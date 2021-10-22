@@ -2,8 +2,9 @@
   "name": "employee-management-system",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
+  "main": "server.js",
   "scripts": {
+    "start": "node server.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
@@ -12,6 +13,11 @@
   },
   "author": "Jimmy Zheng",
   "license": "MIT",
+  "dependencies": {
+    "express": "^4.17.1",
+    "inquirer": "^8.2.0",
+    "mysql2": "^2.2.5"
+  },
   "bugs": {
     "url": "https://github.com/ByteSizeError/Employee-Management-System/issues"
   },
