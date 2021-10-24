@@ -50,7 +50,53 @@ const viewAllEmployees = () => {
     db.query(sql, (err, result) => {
         if (err) throw err;
         console.table(result);
-    })
+    });
+}
+
+const addEmployee = () => {
+
+}
+
+const updateEmployeeRole = () => {
+
+}
+
+const viewAllRoles = () => {
+    const sql = `
+        SELECT role.id,
+            role.title,
+            department.name AS department,
+            role.salary
+        FROM role
+        JOIN department
+        ON role.department_id = department.id
+        `;
+
+    db.query(sql, (err, result) => {
+        if (err) throw err;
+        console.table(result);
+    });
+}
+
+const addRole = () => {
+
+}
+
+const viewAllDepartments = () => {
+    const sql = `
+    SELECT id, name
+    FROM department
+    `;
+
+    db.query(sql, (err, result) => {
+        if (err) throw err;
+        console.table(result);
+    });
+
+}
+
+const addDepartment = () => {
+
 }
 
 const askMenuOption = () => {
@@ -67,10 +113,12 @@ const askMenuOption = () => {
                 case "Update Employee Role":
                     break;
                 case "View All Roles":
+                    viewAllRoles();
                     break;
                 case "Add Role":
                     break;
                 case "View All Departments":
+                    viewAllDepartments();
                     break;
                 case "Add Department":
                     break;
