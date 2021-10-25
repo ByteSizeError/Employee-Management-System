@@ -28,6 +28,7 @@ const viewAllEmployees = () => {
         ON role.department_id = department.id
         LEFT JOIN employee AS manager
         ON employee.manager_id = manager.id
+        ORDER BY employee.id
         `;
 
     db.promise().query(sql)
@@ -39,7 +40,80 @@ const viewAllEmployees = () => {
 }
 
 const addEmployee = () => {
+    const roles = {}
 
+    const sqlRoles = `
+    SELECT id, title
+    FROM role
+    `;
+
+    db.promise().query(sqlRoles)
+        .then(([rows, fields]) => {
+            for (i in rows) {
+                roles[rows[i].title] = rows[i].id;
+            }
+        })
+        .catch(console.log)
+        .then(() => {
+            const employees = {}
+
+            const sqlEmployee = `
+                SELECT id, CONCAT (employee.first_name, " ", employee.last_name) AS name
+                FROM employee
+                `;
+
+            db.promise().query(sqlEmployee)
+                .then(([rows, fields]) => {
+                    for (i in rows) {
+                        employees[rows[i].name] = rows[i].id;
+                    }
+                })
+                .catch(console.log)
+                .then(() => {
+                    const employeeQuestions = [
+                        {
+                            type: "input",
+                            message: "What is the employee's first name?",
+                            name: "first"
+                        },
+                        {
+                            type: "input",
+                            message: "What is the employee's last name?",
+                            name: "last"
+                        },
+                        {
+                            type: "list",
+                            message: "What is the employee's role?",
+                            name: "role",
+                            choices: Object.keys(roles)
+                        },
+                        {
+                            type: "list",
+                            message: "Who is the employee's manager?",
+                            name: "manager",
+                            choices: Object.keys(employees)
+                        }
+                    ]
+
+                    inquirer
+                        .prompt(employeeQuestions)
+                        .then((data) => {
+                            const roleId = roles[data.role];
+                            const managerId = employees[data.manager];
+                            const sql = `
+                            INSERT INTO employee (first_name, last_name, role_id, manager_id)
+                            VALUES ('${data.first}', '${data.last}', '${roleId}', '${managerId}')
+                            `;
+
+                            db.promise().query(sql)
+                                .then(([rows, fields]) => {
+                                    console.log(`Added ${data.first} ${data.last} to the database.`);
+                                })
+                                .catch(console.log)
+                                .then(() => askMenuOption());
+                        });
+                });
+        });
 }
 
 const updateEmployeeRole = () => {
@@ -55,6 +129,7 @@ const viewAllRoles = () => {
         FROM role
         JOIN department
         ON role.department_id = department.id
+        ORDER BY role.id
         `;
 
     db.promise().query(sql)
@@ -67,56 +142,60 @@ const viewAllRoles = () => {
 }
 
 const addRole = () => {
-    const departments = []
+    const departments = {}
 
     const sql = `
-    SELECT name
+    SELECT id, name
     FROM department
     `;
 
     db.promise().query(sql)
         .then(([rows, fields]) => {
             for (i in rows) {
-                departments.push(rows[i].name)
+                departments[rows[i].name] = rows[i].id;
             }
         })
         .catch(console.log)
+        .then(() => {
+            const roleQuestions = [
+                {
+                    type: "input",
+                    message: "What is the name of the role?",
+                    name: "title"
+                },
+                {
+                    type: "number",
+                    message: "What is the salary of the role?",
+                    name: "salary"
+                },
+                {
+                    type: "list",
+                    message: "Which department does the role belong to?",
+                    name: "department",
+                    choices: Object.keys(departments)
+                }
+            ]
 
-        const roleQuestions = [
-            {
-                type: "input",
-                message: "What is the name of the role?",
-                name: "title"
-            },
-            {
-                type: "number",
-                message: "What is the salary of the role?",
-                name: "salary"
-            },
-            {
-                type: "list",
-                message: "Which department does the role belong to?",
-                name: "department",
-                choices: departments
-            }
-        ]
+            inquirer
+                .prompt(roleQuestions)
+                .then((data) => {
+                    const departmentId = departments[data.department];
+                    const sql = `
+                    INSERT INTO role (title, salary, department_id)
+                    VALUES ('${data.title}', '${data.salary}', '${departmentId}')
+                    `;
 
-    inquirer
-        .prompt(roleQuestions)
-        .then((data) => {
-            const department_id = departments.indexOf(data.department);
-            const sql = `
-            INSERT INTO role (title, salary, department_id)
-            VALUES ('${data.title}', '${data.salary}', '${department_id}')
-            `;
+                    db.promise().query(sql)
+                        .then(([rows, fields]) => {
+                            console.log(`Added ${data.title} to the database.`);
+                        })
+                        .catch(console.log)
+                        .then(() => askMenuOption());
+                });
 
-            db.promise().query(sql)
-                .then(([rows, fields]) => {
-                    console.log(`Added ${data.title} to the database.`);
-                })
-                .catch(console.log)
-                .then(() => askMenuOption());
         });
+
+
 }
 
 // department
@@ -125,6 +204,7 @@ const viewAllDepartments = () => {
     const sql = `
         SELECT id, name
         FROM department
+        ORDER BY id
         `;
 
     db.promise().query(sql)
@@ -191,6 +271,7 @@ const askMenuOption = () => {
                     viewAllEmployees();
                     break;
                 case "Add Employee":
+                    addEmployee();
                     break;
                 case "Update Employee Role":
                     break;
