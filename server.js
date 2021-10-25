@@ -117,7 +117,70 @@ const addEmployee = () => {
 }
 
 const updateEmployeeRole = () => {
+    const employees = {}
 
+    const sqlEmployee = `
+        SELECT id, CONCAT (employee.first_name, " ", employee.last_name) AS name
+        FROM employee
+        `;
+    db.promise().query(sqlEmployee)
+        .then(([rows, fields]) => {
+            for (i in rows) {
+                employees[rows[i].name] = rows[i].id;
+            }
+        })
+        .catch(console.log)
+        .then(() => {
+            const roles = {}
+
+            const sqlRoles = `
+                SELECT id, title
+                FROM role
+                `;
+
+            db.promise().query(sqlRoles)
+                .then(([rows, fields]) => {
+                    for (i in rows) {
+                        roles[rows[i].title] = rows[i].id;
+                    }
+                })
+                .catch(console.log)
+                .then(() => {
+                    const updateEmployeeQuestion = [
+                        {
+                            type: "list",
+                            message: "Which employee's role do you want to update?",
+                            name: "employee",
+                            choices: Object.keys(employees)
+                        },
+                        {
+                            type: "list",
+                            message: "Which role do you wnat to assign the selected employee?",
+                            name: "role",
+                            choices: Object.keys(roles)
+                        }
+                    ]
+
+                    inquirer
+                        .prompt(updateEmployeeQuestion)
+                        .then((data) => {
+                            const employeeId = employees[data.employee];
+                            const roleId = roles[data.role];
+                            const sql = `
+                                UPDATE employee
+                                SET role_id = ${roleId}
+                                WHERE id = ${employeeId}
+                                `;
+
+                            db.promise().query(sql)
+                                .then(([rows, fields]) => {
+                                    console.log(`Updated employee's role`);
+                                })
+                                .catch(console.log)
+                                .then(() => askMenuOption());
+                        });
+                })
+        });
 }
 
 const viewAllRoles = () => {
@@ -138,7 +201,6 @@ const viewAllRoles = () => {
         })
         .catch(console.log)
         .then(() => askMenuOption());
-
 }
 
 const addRole = () => {
@@ -192,10 +254,7 @@ const addRole = () => {
                         .catch(console.log)
                         .then(() => askMenuOption());
                 });
-
         });
-
-
 }
 
 // department
@@ -274,6 +333,7 @@ const askMenuOption = () => {
                     addEmployee();
                     break;
                 case "Update Employee Role":
+                    updateEmployeeRole();
                     break;
                 case "View All Roles":
                     viewAllRoles();
@@ -288,7 +348,6 @@ const askMenuOption = () => {
                     addDepartment();
                     break;
                 case "Quit":
-                    // exit program
                     db.end();
                     break;
                 default:
