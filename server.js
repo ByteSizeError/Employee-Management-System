@@ -12,9 +12,11 @@ const db = mysql.createConnection(
     console.log(`Connected to the company_db database.`)
 );
 
+// view all employees
 const viewAllEmployees = () => {
     const sql = `
-        SELECT employee.id, 
+        SELECT 
+            employee.id, 
             employee.first_name, 
             employee.last_name, 
             role.title,
@@ -31,6 +33,7 @@ const viewAllEmployees = () => {
         ORDER BY employee.id
         `;
 
+    // create a promise so queries are asynchronous
     db.promise().query(sql)
         .then(([rows, fields]) => {
             console.table(rows);
@@ -185,7 +188,8 @@ const updateEmployeeRole = () => {
 
 const viewAllRoles = () => {
     const sql = `
-        SELECT role.id,
+        SELECT 
+            role.id,
             role.title,
             department.name AS department,
             role.salary
@@ -298,7 +302,6 @@ const addDepartment = () => {
                 })
                 .catch(console.log)
                 .then(() => askMenuOption());
-
         });
 }
 
@@ -357,6 +360,27 @@ const askMenuOption = () => {
 }
 
 const init = () => {
+    console.log(`
+    ███████ ███    ███ ██████  ██       ██████  ██    ██ ███████ ███████                        
+    ██      ████  ████ ██   ██ ██      ██    ██  ██  ██  ██      ██                             
+    █████   ██ ████ ██ ██████  ██      ██    ██   ████   █████   █████                          
+    ██      ██  ██  ██ ██      ██      ██    ██    ██    ██      ██                             
+    ███████ ██      ██ ██      ███████  ██████     ██    ███████ ███████                        
+                                                                                                
+                                                                                                
+    ███    ███  █████  ███    ██  █████   ██████  ███████ ███    ███ ███████ ███    ██ ████████ 
+    ████  ████ ██   ██ ████   ██ ██   ██ ██       ██      ████  ████ ██      ████   ██    ██    
+    ██ ████ ██ ███████ ██ ██  ██ ███████ ██   ███ █████   ██ ████ ██ █████   ██ ██  ██    ██    
+    ██  ██  ██ ██   ██ ██  ██ ██ ██   ██ ██    ██ ██      ██  ██  ██ ██      ██  ██ ██    ██    
+    ██      ██ ██   ██ ██   ████ ██   ██  ██████  ███████ ██      ██ ███████ ██   ████    ██    
+                                                                                                
+                                                                                                
+    ███████ ██    ██ ███████ ████████ ███████ ███    ███                                        
+    ██       ██  ██  ██         ██    ██      ████  ████                                        
+    ███████   ████   ███████    ██    █████   ██ ████ ██                                        
+         ██    ██         ██    ██    ██      ██  ██  ██                                        
+    ███████    ██    ███████    ██    ███████ ██      ██                                        
+    `)
     askMenuOption();
 }
 
